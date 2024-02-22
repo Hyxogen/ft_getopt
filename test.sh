@@ -24,11 +24,11 @@ diff_test() {
 	CMD=$(compile_cmd "$@")
 	shift 2
 
-	$CMD -DMINE=1 -o mine.out
-	./mine.out "$@" > $MINE_STDOUT 2> $MINE_STDERR
+	$CMD -DMINE=1
+	./a.out "$@" > $MINE_STDOUT 2> $MINE_STDERR
 	MY_RES=$?
-	$CMD -DMINE=0 -o theirs.out
-	./theirs.out "$@" > $THEIRS_STDOUT 2> $THEIRS_STDERR
+	$CMD -DMINE=0
+	./a.out "$@" > $THEIRS_STDOUT 2> $THEIRS_STDERR
 	THEIR_RES=$?
 
 	if [ $MY_RES != 0 ]; then
@@ -42,9 +42,20 @@ diff_test() {
 		echo "< mine"
 		echo "> theirs"
 		echo "compiled with: $CMD"
-		echo "run: ./mine.out $@"
+		echo "run: ./a.out $@"
 
 		diff $MINE_STDOUT $THEIRS_STDOUT --color
+	fi
+
+	diff -q $MINE_STDERR $THEIRS_STDERR >/dev/null
+	if [ $? != 0 ]; then
+		echo "KO"
+		echo "< mine"
+		echo "> theirs"
+		echo "compiled with: $CMD"
+		echo "run: ./a.out $@"
+
+		diff $MINE_STDERR $THEIRS_STDERR --color
 	fi
 	echo "OK"
 }

@@ -43,17 +43,16 @@ static int do_getopt_short(int argc, char *const *argv, const char *optstring)
 					argc, argv,
 					"option requires an argument -- '%c'\n",
 					ft_optopt);
-				goto error;
+				break;
 			}
 		}
 		return *optstring;
 	}
 
-	if (!colon && ft_opterr) {
+	if (!*optstring && !colon && ft_opterr) {
 		ft_optopt = cur[1];
 		print_error(argc, argv, "invalid option -- '%c'\n", ft_optopt);
 	}
-error:
 	return '?';
 }
 
