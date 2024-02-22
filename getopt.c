@@ -2,56 +2,96 @@
 #include <assert.h>
 #include <stdio.h>
 #include "ft_getopt.h"
+#include <string.h>
+#include <getopt.h>
 
-int ft_optind = 1, ft_opterr = 0, ft_optopt = 0;
+int ft_optind = 0, ft_opterr = 0, ft_optopt = 0;
 char *ft_optarg = NULL;
 
-__attribute__((format(printf, 3, 4))) static void
-print_error(int argc, char *const *argv, const char *restrict fmt, ...)
+__attribute__((format(printf, 2, 3))) static void
+print_error(const char *progname, const char *restrict fmt, ...)
 {
 	va_list list;
 	va_start(list, fmt);
 
-	if (argc > 0)
-		fprintf(stderr, "%s: ", argv[0]);
+	if (progname)
+		fprintf(stderr, "%s: ", progname);
 	vfprintf(stderr, fmt, list);
 }
 
-static int do_getopt_short(int argc, char *const *argv, const char *optstring)
+static int do_getopt_long(int argc, char **argv, const char *optstring,
+			  const struct option *longopts, int *longindex)
 {
+	(void)argc;
 	int colon = optstring[0] == ':';
-	if (colon)
-		++optstring;
 
-	char *cur = argv[ft_optind++];
+	char *cur = argv[ft_optind++] + 2;
 
-	for (; *optstring; ++optstring) {
-		if (*optstring == ':' || cur[1] != *optstring)
+	size_t cnt, match;
+	char *arg;
+	for (size_t i = 0; longopts[i].name; ++i) {
+		const char *optname = longopts[i].name;
+		char *start = cur;
+
+		while (*start && *start != '=' && *optname == *start) {
+			++optname;
+			++start;
+		}
+
+		if (*start && *start != '=')
 			continue;
 
-		if (optstring[1] == ':') {
-			if (cur[2]) {
-				ft_optarg = &cur[2];
-			} else if (ft_optind < argc) {
-				ft_optarg = argv[ft_optind++];
-			} else if (colon) {
-				ft_optopt = *optstring;
-				return ':';
-			} else if (ft_opterr) {
-				ft_optopt = *optstring;
-				print_error(
-					argc, argv,
-					"option requires an argument -- '%c'\n",
-					ft_optopt);
-				break;
-			}
+		match = i;
+		arg = start;
+		if (!*optname) {
+			cnt = 1;
+			break;
 		}
-		return *optstring;
+		++cnt;
 	}
 
-	if (!*optstring && !colon && ft_opterr) {
-		ft_optopt = cur[1];
-		print_error(argc, argv, "invalid option -- '%c'\n", ft_optopt);
+	if (cnt == 1) {
+		const struct option *opt = &longopts[match];
+		if (*arg == '=') {
+			if (!opt->has_arg) {
+				if (!colon && ft_opterr)
+					print_error(
+						argv[0],
+						"option does not take an argument: '%s'\n",
+						opt->name);
+				return '?';
+			}
+			ft_optarg = arg + 1;
+		} else if (opt->has_arg == required_argument) {
+			if (!(ft_optarg = argv[ft_optind])) {
+				ft_optopt = opt->val;
+				if (colon)
+					return ':';
+				if (ft_opterr)
+					print_error(
+						argv[0],
+						"option requires an arguments: '%s'\n",
+						opt->name);
+				return '?';
+			}
+			++ft_optind;
+		}
+		if (longindex)
+			*longindex = match;
+
+		if (opt->flag) {
+			*opt->flag = 1;
+			return 0;
+		}
+		return opt->val;
+	}
+
+	if (!colon && ft_opterr) {
+		if (cnt > 1)
+			print_error(argv[0], "option is ambigious: ");
+		else
+			print_error(argv[0], "unrecognized option: ");
+		print_error(NULL, "'--%s'\n", cur);
 	}
 	return '?';
 }
@@ -67,12 +107,101 @@ static void permute(char **argv, size_t dest, size_t src)
 
 int ft_getopt(int argc, char **argv, const char *optstring)
 {
-	return ft_getopt_long(argc, argv, optstring, NULL, NULL);
+	int colon = optstring[0] == ':';
+	if (colon)
+		++optstring;
+
+	static int ft_optchar;
+
+	if (!ft_optind) {
+		ft_optind = 1;
+		ft_optchar = 0;
+	}
+
+	if (ft_optind >= argc || !argv[ft_optind])
+		return -1;
+	
+	//printf("optchar: %i\n", ft_optchar);
+	if (ft_optchar && !argv[ft_optind][ft_optchar]) {
+		ft_optchar = 1;
+		++ft_optind;
+	}
+
+	if (ft_optchar == 0)
+		++ft_optchar;
+
+	int saved = ft_optind;
+
+	int tmp = ft_optind;
+	while (!argv[tmp] || argv[tmp][0] != '-') {
+		if (!argv[tmp])
+			return -1;
+		++tmp;
+		ft_optchar = 1;
+	}
+	int resumed = ft_optind;
+
+	if (resumed > saved) {
+		for (int i = ft_optind - resumed; i > 0; --i)
+			permute(argv, saved, ft_optind - 1);
+		ft_optind -= resumed - saved;
+	}
+
+	if (!strcmp(argv[ft_optind], "--"))
+		return -1;
+
+	char *cur = argv[ft_optind];
+	int opt = argv[ft_optind][ft_optchar++];
+	const char *pos = strchr(optstring, opt);
+
+	if (!pos) {
+		if (!colon && ft_opterr) {
+			ft_optopt = opt;
+			print_error(argv[0], "invalid option -- '%c'\n",
+				    ft_optopt);
+		}
+		if (!cur[ft_optchar]) {
+			ft_optchar = 0;
+			++ft_optind;
+		}
+		return '?';
+	} 
+
+	if (pos[1] == ':') {
+		if (cur[ft_optchar]) {
+			ft_optarg = &cur[ft_optchar];
+			++ft_optind;
+			ft_optchar = 0;
+		} else if (ft_optind < argc) {
+			ft_optarg = argv[ft_optind + 1];
+			ft_optind += 2;
+			ft_optchar = 0;
+		} else if (colon) {
+			ft_optopt = opt;
+			return ':';
+		} else {
+			ft_optopt = opt;
+			if (ft_opterr)
+				print_error(
+					argv[0],
+					"option requires an argument -- '%c'\n",
+					ft_optopt);
+			return '?';
+		}
+	} else if (!cur[ft_optchar]) {
+		ft_optchar = 0;
+		++ft_optind;
+
+	}
+	return opt;
 }
 
 int ft_getopt_long(int argc, char **argv, const char *optstring,
 		   const struct option *longopts, int *longindex)
 {
+	assert(argv);
+
+	(void)do_getopt_long;
 	(void)longopts;
 	(void)longindex;
 	int saved = ft_optind;
@@ -85,7 +214,9 @@ int ft_getopt_long(int argc, char **argv, const char *optstring,
 	}
 
 	int resumed = ft_optind;
-	int ret = do_getopt_short(argc, argv, optstring);
+	int ret = 0;
+	(void)optstring;
+	//int ret = do_getopt_short(argc, argv, optstring);
 
 	if (ret != -1 && resumed > saved) {
 		for (int i = ft_optind - resumed; i > 0; --i)
