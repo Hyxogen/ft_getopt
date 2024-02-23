@@ -129,10 +129,6 @@ static int do_getopt_short(int argc, char **argv, const char *optstring)
 			print_error(argv[0], "invalid option -- '%c'\n",
 				    ft_optopt);
 		}
-		if (!cur[ft_optchar]) {
-			ft_optchar = 0;
-			++ft_optind;
-		}
 		return '?';
 	} 
 
@@ -155,8 +151,6 @@ static int do_getopt_short(int argc, char **argv, const char *optstring)
 					argv[0],
 					"option requires an argument -- '%c'\n",
 					ft_optopt);
-			ft_optchar = 0;
-			++ft_optind;
 			return '?';
 		}
 	}
