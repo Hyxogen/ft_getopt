@@ -132,7 +132,7 @@ static int do_getopt_short(int argc, char **argv, const char *optstring)
 				    ft_optopt);
 		}
 		return '?';
-	} 
+	}
 
 	if (pos[1] == ':') {
 		if (cur[ft_optchar]) {
@@ -191,7 +191,7 @@ int ft_getopt(int argc, char **argv, const char *optstring)
 	int res = do_getopt_short(argc, argv, optstring);
 
 	if (resumed > saved) {
-		for (int i = ft_optind - saved ; i > 0; --i)
+		for (int i = ft_optind - saved; i > 0; --i)
 			permute(argv, saved, ft_optind);
 		ft_optind -= resumed - saved;
 	}
