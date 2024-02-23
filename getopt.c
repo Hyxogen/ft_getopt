@@ -116,8 +116,10 @@ static int do_getopt_short(int argc, char **argv, const char *optstring)
 	if (colon)
 		++optstring;
 
-	if (!strcmp(argv[ft_optind], "--"))
+	if (!strcmp(argv[ft_optind], "--")) {
+		++ft_optind;
 		return -1;
+	}
 
 	char *cur = argv[ft_optind];
 	int opt = cur[ft_optchar++];

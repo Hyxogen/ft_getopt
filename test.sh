@@ -81,6 +81,8 @@ run_tests() {
 	diff_test_both ':f:o:y' --y -f in.txt -o out.txt -x
 	diff_test_both ':f:o:y' --lol -f in.txt -o out.txt -x
 	diff_test_both ':f:o:yn' --lol -nfin.txt -o out.txt -x boter kaas en eieren
+	diff_test_both ':f:o:yn' -- --lol -nfin.txt -o out.txt -x boter kaas en eieren
+	diff_test_both ':f:o:yn' --lol -nfin.txt -- -o out.txt -x boter kaas en eieren
 }
 
 
