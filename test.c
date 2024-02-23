@@ -27,11 +27,10 @@ extern char* OPTARG;
 int main(int argc, char **argv)
 {
 	printf("argc: %i\n", argc);
-	OPTIND = 1;
 	OPTERR = OPTERR_VAL;
 	int c;
 	while ((c = GETOPT(argc, argv, OPTSTRING)) != -1) {
-		printf("ret: %x optind: %i arg: \"%s\"\n", (unsigned) c, OPTIND, OPTARG);
+		printf("ret: %x arg: \"%s\"\n", (unsigned) c, OPTARG);
 		OPTARG = NULL;
 	}
 	printf("optind at end: %i\n", OPTIND);

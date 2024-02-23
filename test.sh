@@ -25,7 +25,7 @@ diff_test() {
 	shift 2
 
 	$CMD -DMINE=1
-	./a.out "$@" > $MINE_STDOUT 2> $MINE_STDERR
+	timeout 1s ./a.out "$@" > $MINE_STDOUT 2> $MINE_STDERR
 	MY_RES=$?
 	$CMD -DMINE=0
 	./a.out "$@" > $THEIRS_STDOUT 2> $THEIRS_STDERR
@@ -70,14 +70,16 @@ run_tests() {
 	diff_test_both 'abcd' -a -b -c -d
 	diff_test_both 'abcd' -abd
 	diff_test_both 'abcd' -a -b -c -d kaas
+	diff_test_both ':a:bcd' -a -b -c -d kaas
 	diff_test_both ':f:o:y' -f in.txt -o out.txt -y
 	diff_test_both ':f:o:y' -y -f in.txt -o out.txt
 	diff_test_both 'f:o:y' -f in.txt -o out.txt -y
+	#diff_test_both 'f:o:yz' kaas -f in.txt -zoout.txt boter
 	diff_test_both ':f:o:y' -y -f in.txt -o out.txt
 	diff_test_both ':f:o:y' -y -f in.txt -o out.txt -x
 	diff_test_both ':f:o:y' --y -f in.txt -o out.txt -x
 	diff_test_both ':f:o:y' --lol -f in.txt -o out.txt -x
-	diff_test_both ':f:o:yn' --lol -nfin.txt -o out.txt -x
+	diff_test_both ':f:o:yn' --lol -nfin.txt -o out.txt -x boter kaas en eieren
 }
 
 

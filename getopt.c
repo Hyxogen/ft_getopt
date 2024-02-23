@@ -8,6 +8,8 @@
 int ft_optind = 0, ft_opterr = 0, ft_optopt = 0;
 char *ft_optarg = NULL;
 
+static int ft_optchar = 0;
+
 __attribute__((format(printf, 2, 3))) static void
 print_error(const char *progname, const char *restrict fmt, ...)
 {
@@ -26,6 +28,9 @@ static int do_getopt_long(int argc, char **argv, const char *optstring,
 	int colon = optstring[0] == ':';
 
 	char *cur = argv[ft_optind++] + 2;
+
+	if (!*cur)
+		return -1;
 
 	size_t cnt, match;
 	char *arg;
@@ -105,47 +110,11 @@ static void permute(char **argv, size_t dest, size_t src)
 	argv[dest] = tmp;
 }
 
-int ft_getopt(int argc, char **argv, const char *optstring)
+static int do_getopt_short(int argc, char **argv, const char *optstring)
 {
 	int colon = optstring[0] == ':';
 	if (colon)
 		++optstring;
-
-	static int ft_optchar;
-
-	if (!ft_optind) {
-		ft_optind = 1;
-		ft_optchar = 0;
-	}
-
-	if (ft_optind >= argc || !argv[ft_optind])
-		return -1;
-	
-	//printf("optchar: %i\n", ft_optchar);
-	if (ft_optchar && !argv[ft_optind][ft_optchar]) {
-		ft_optchar = 1;
-		++ft_optind;
-	}
-
-	if (ft_optchar == 0)
-		++ft_optchar;
-
-	int saved = ft_optind;
-
-	int tmp = ft_optind;
-	while (!argv[tmp] || argv[tmp][0] != '-') {
-		if (!argv[tmp])
-			return -1;
-		++tmp;
-		ft_optchar = 1;
-	}
-	int resumed = ft_optind;
-
-	if (resumed > saved) {
-		for (int i = ft_optind - resumed; i > 0; --i)
-			permute(argv, saved, ft_optind - 1);
-		ft_optind -= resumed - saved;
-	}
 
 	if (!strcmp(argv[ft_optind], "--"))
 		return -1;
@@ -172,7 +141,7 @@ int ft_getopt(int argc, char **argv, const char *optstring)
 			ft_optarg = &cur[ft_optchar];
 			++ft_optind;
 			ft_optchar = 0;
-		} else if (ft_optind < argc) {
+		} else if (ft_optind + 1 < argc) {
 			ft_optarg = argv[ft_optind + 1];
 			ft_optind += 2;
 			ft_optchar = 0;
@@ -186,6 +155,8 @@ int ft_getopt(int argc, char **argv, const char *optstring)
 					argv[0],
 					"option requires an argument -- '%c'\n",
 					ft_optopt);
+			ft_optchar = 0;
+			++ft_optind;
 			return '?';
 		}
 	} else if (!cur[ft_optchar]) {
@@ -196,14 +167,54 @@ int ft_getopt(int argc, char **argv, const char *optstring)
 	return opt;
 }
 
+int ft_getopt(int argc, char **argv, const char *optstring)
+{
+	if (!ft_optind) {
+		ft_optind = 1;
+		ft_optchar = 0;
+	}
+
+	if (ft_optind >= argc || !argv[ft_optind])
+		return -1;
+
+	if (ft_optchar && !argv[ft_optind][ft_optchar]) {
+		ft_optchar = 1;
+		++ft_optind;
+	}
+
+	if (ft_optchar == 0)
+		++ft_optchar;
+
+	int saved = ft_optind;
+
+	int tmp = ft_optind;
+	while (!argv[tmp] || argv[tmp][0] != '-') {
+		if (!argv[tmp])
+			return -1;
+		++tmp;
+		ft_optchar = 1;
+	}
+	int resumed = ft_optind = tmp;
+
+	int res = do_getopt_short(argc, argv, optstring);
+
+	if (resumed > saved) {
+		for (int i = ft_optind - 1 - saved ; i > 0; --i)
+			permute(argv, saved, ft_optind - 1);
+		ft_optind -= resumed - saved;
+	}
+
+	return res;
+}
+
 int ft_getopt_long(int argc, char **argv, const char *optstring,
 		   const struct option *longopts, int *longindex)
 {
 	assert(argv);
 
-	(void)do_getopt_long;
-	(void)longopts;
-	(void)longindex;
+	if (ft_optchar)
+		return ft_getopt(argc, argv, optstring);
+
 	int saved = ft_optind;
 	while (ft_optind < argc &&
 	       (!argv[ft_optind] || argv[ft_optind][0] != '-'))
@@ -214,15 +225,14 @@ int ft_getopt_long(int argc, char **argv, const char *optstring,
 	}
 
 	int resumed = ft_optind;
-	int ret = 0;
-	(void)optstring;
-	//int ret = do_getopt_short(argc, argv, optstring);
 
-	if (ret != -1 && resumed > saved) {
+	if (resumed > saved) {
 		for (int i = ft_optind - resumed; i > 0; --i)
 			permute(argv, saved, ft_optind - 1);
 		ft_optind -= resumed - saved;
 	}
 
-	return ret;
+	if (argv[ft_optind][1] != '-')
+		return ft_getopt(argc, argv, optstring);
+	return do_getopt_long(argc, argv, optstring, longopts, longindex);
 }
