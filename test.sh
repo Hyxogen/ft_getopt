@@ -67,6 +67,7 @@ diff_test_both() {
 
 run_tests() {
 	diff_test_both '' -a -b -c -d
+	diff_test_both ':f' -f
 	diff_test_both 'abcd' -a -b -c -d
 	diff_test_both 'abcd' -abd
 	diff_test_both 'abcd' -a -b -c -d kaas
