@@ -229,10 +229,9 @@ int ft_getopt_long(int argc, char **argv, const char *optstring,
 	int res = do_getopt_long(argc, argv, optstring, longopts, longindex);
 
 	if (resumed > saved) {
-		for (int i = ft_optind - saved - 1; i > 0; --i)
-			permute(argv, saved, ft_optind - 1);
+		for (int i = ft_optind - resumed; i > 0; --i)
+			permute(argv, saved, resumed);
 		ft_optind -= resumed - saved;
 	}
-
 	return res;
 }
