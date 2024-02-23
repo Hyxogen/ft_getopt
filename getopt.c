@@ -120,7 +120,7 @@ static int do_getopt_short(int argc, char **argv, const char *optstring)
 		return -1;
 
 	char *cur = argv[ft_optind];
-	int opt = argv[ft_optind][ft_optchar++];
+	int opt = cur[ft_optchar++];
 	const char *pos = strchr(optstring, opt);
 
 	if (!pos) {
