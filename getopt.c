@@ -209,8 +209,9 @@ int ft_getopt_long(int argc, char **argv, const char *optstring,
 	if (!ft_optind)
 		init_getopt();
 
-	if (ft_optchar)
+	if (ft_optchar) {
 		return ft_getopt(argc, argv, optstring);
+	}
 
 	int saved = ft_optind;
 	int tmp = ft_optind;
@@ -219,18 +220,19 @@ int ft_getopt_long(int argc, char **argv, const char *optstring,
 			return -1;
 		++tmp;
 	}
+	int resumed = ft_optind = tmp;
 
 	if (argv[ft_optind][1] != '-') {
 		return ft_getopt(argc, argv, optstring);
 	}
 
-	int resumed = ft_optind = tmp;
 	int res = do_getopt_long(argc, argv, optstring, longopts, longindex);
 
 	if (resumed > saved) {
-		for (int i = ft_optind - saved; i > 0; --i)
-			permute(argv, saved, ft_optind);
+		for (int i = ft_optind - saved - 1; i > 0; --i)
+			permute(argv, saved, ft_optind - 1);
 		ft_optind -= resumed - saved;
 	}
+
 	return res;
 }
