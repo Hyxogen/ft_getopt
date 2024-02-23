@@ -32,7 +32,7 @@ static int do_getopt_long(int argc, char **argv, const char *optstring,
 	if (!*cur)
 		return -1;
 
-	size_t cnt, match;
+	int cnt = 0, match;
 	char *arg;
 	for (size_t i = 0; longopts[i].name; ++i) {
 		const char *optname = longopts[i].name;
@@ -62,7 +62,7 @@ static int do_getopt_long(int argc, char **argv, const char *optstring,
 				if (!colon && ft_opterr)
 					print_error(
 						argv[0],
-						"option does not take an argument: '%s'\n",
+						"option '--%s' doesn't allow an argument\n",
 						opt->name);
 				return '?';
 			}
@@ -75,7 +75,7 @@ static int do_getopt_long(int argc, char **argv, const char *optstring,
 				if (ft_opterr)
 					print_error(
 						argv[0],
-						"option requires an arguments: '%s'\n",
+						"option '--%s' requires an argument\n",
 						opt->name);
 				return '?';
 			}
@@ -85,7 +85,7 @@ static int do_getopt_long(int argc, char **argv, const char *optstring,
 			*longindex = match;
 
 		if (opt->flag) {
-			*opt->flag = 1;
+			*opt->flag = opt->val;
 			return 0;
 		}
 		return opt->val;
@@ -93,10 +93,9 @@ static int do_getopt_long(int argc, char **argv, const char *optstring,
 
 	if (!colon && ft_opterr) {
 		if (cnt > 1)
-			print_error(argv[0], "option is ambigious: ");
+			print_error(argv[0], "option '%s' is ambigious\n", cur);
 		else
-			print_error(argv[0], "unrecognized option: ");
-		print_error(NULL, "'--%s'\n", cur);
+			print_error(argv[0], "unrecognized option: '%s'\n", cur);
 	}
 	return '?';
 }
@@ -157,14 +156,18 @@ static int do_getopt_short(int argc, char **argv, const char *optstring)
 		}
 	}
 	return opt;
+} 
+
+static void init_getopt()
+{
+	ft_optind = 1;
+	ft_optchar = 0;
 }
 
 int ft_getopt(int argc, char **argv, const char *optstring)
 {
-	if (!ft_optind) {
-		ft_optind = 1;
-		ft_optchar = 0;
-	}
+	if (!ft_optind)
+		init_getopt();
 
 	if (ft_optind >= argc || !argv[ft_optind])
 		return -1;
@@ -203,27 +206,31 @@ int ft_getopt_long(int argc, char **argv, const char *optstring,
 {
 	assert(argv);
 
+	if (!ft_optind)
+		init_getopt();
+
 	if (ft_optchar)
 		return ft_getopt(argc, argv, optstring);
 
 	int saved = ft_optind;
-	while (ft_optind < argc &&
-	       (!argv[ft_optind] || argv[ft_optind][0] != '-'))
-		++ft_optind;
-	if (ft_optind >= argc) {
-		ft_optind = saved;
-		return -1;
+	int tmp = ft_optind;
+	while (!argv[tmp] || argv[tmp][0] != '-') {
+		if (!argv[tmp])
+			return -1;
+		++tmp;
 	}
 
-	int resumed = ft_optind;
+	if (argv[ft_optind][1] != '-') {
+		return ft_getopt(argc, argv, optstring);
+	}
+
+	int resumed = ft_optind = tmp;
+	int res = do_getopt_long(argc, argv, optstring, longopts, longindex);
 
 	if (resumed > saved) {
-		for (int i = ft_optind - resumed; i > 0; --i)
-			permute(argv, saved, ft_optind - 1);
+		for (int i = ft_optind - saved; i > 0; --i)
+			permute(argv, saved, ft_optind);
 		ft_optind -= resumed - saved;
 	}
-
-	if (argv[ft_optind][1] != '-')
-		return ft_getopt(argc, argv, optstring);
-	return do_getopt_long(argc, argv, optstring, longopts, longindex);
+	return res;
 }

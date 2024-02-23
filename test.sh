@@ -33,6 +33,7 @@ diff_test() {
 
 	if [ $MY_RES != 0 ]; then
 		echo "KO (exit val): $CMD -DMINE=1"
+		echo "run: ./a.out $@"
 		return
 	fi
 
@@ -85,9 +86,27 @@ run_tests() {
 	diff_test_both ':f:o:yn' --lol -nfin.txt -- -o out.txt -x boter kaas en eieren
 }
 
+run_tests_long() {
+	DRIVER=testlong.c
+	#run_tests
+
+	diff_test_both '' --vlag
+	diff_test_both '' --vlag=no
+	diff_test_both '' --vl
+	diff_test_both '' --similarv
+	diff_test_both '' --similarflag
+	diff_test_both '' --0ptarg
+	diff_test_both '' --0ptarg a
+	diff_test_both '' --0ptarg=a
+	diff_test_both '' --reqarg
+	diff_test_both '' --reqarg a
+	diff_test_both '' --reqarg=a
+	diff_test_both '' --setflag
+}
+
 
 if [ "$#" = 0 ]; then
-	run_tests
+	run_tests_long
 else
 	diff_test $@
 	#run $@
