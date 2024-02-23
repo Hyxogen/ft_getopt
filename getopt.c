@@ -194,7 +194,9 @@ int ft_getopt(int argc, char **argv, const char *optstring)
 	int res = do_getopt_short(argc, argv, optstring);
 
 	if (resumed > saved) {
-		for (int i = ft_optind - saved; i > 0; --i)
+		for (int i = ft_optind - saved; i > 0; --i)//TODO check, it's
+							   //currently not the
+							   //same as getopt_long
 			permute(argv, saved, ft_optind);
 		ft_optind -= resumed - saved;
 	}
@@ -215,16 +217,12 @@ int ft_getopt_long(int argc, char **argv, const char *optstring,
 
 	int saved = ft_optind;
 	int tmp = ft_optind;
-	while (!argv[tmp] || argv[tmp][0] != '-') {
+	while (!argv[tmp] || argv[tmp][0] != '-' || argv[tmp][1] != '-') {
 		if (!argv[tmp])
-			return -1;
+			return ft_getopt(argc, argv, optstring);
 		++tmp;
 	}
 	int resumed = ft_optind = tmp;
-
-	if (argv[ft_optind][1] != '-') {
-		return ft_getopt(argc, argv, optstring);
-	}
 
 	int res = do_getopt_long(argc, argv, optstring, longopts, longindex);
 
