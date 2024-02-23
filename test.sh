@@ -74,7 +74,7 @@ run_tests() {
 	diff_test_both ':f:o:y' -f in.txt -o out.txt -y
 	diff_test_both ':f:o:y' -y -f in.txt -o out.txt
 	diff_test_both 'f:o:y' -f in.txt -o out.txt -y
-	#diff_test_both 'f:o:yz' kaas -f in.txt -zoout.txt boter
+	diff_test_both 'f:o:yz' kaas -f in.txt -zoout.txt boter
 	diff_test_both ':f:o:y' -y -f in.txt -o out.txt
 	diff_test_both ':f:o:y' -y -f in.txt -o out.txt -x
 	diff_test_both ':f:o:y' --y -f in.txt -o out.txt -x

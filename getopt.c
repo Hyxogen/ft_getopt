@@ -159,10 +159,6 @@ static int do_getopt_short(int argc, char **argv, const char *optstring)
 			++ft_optind;
 			return '?';
 		}
-	} else if (!cur[ft_optchar]) {
-		ft_optchar = 0;
-		++ft_optind;
-
 	}
 	return opt;
 }
@@ -199,11 +195,10 @@ int ft_getopt(int argc, char **argv, const char *optstring)
 	int res = do_getopt_short(argc, argv, optstring);
 
 	if (resumed > saved) {
-		for (int i = ft_optind - 1 - saved ; i > 0; --i)
-			permute(argv, saved, ft_optind - 1);
+		for (int i = ft_optind - saved ; i > 0; --i)
+			permute(argv, saved, ft_optind);
 		ft_optind -= resumed - saved;
 	}
-
 	return res;
 }
 
