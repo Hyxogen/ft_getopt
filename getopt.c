@@ -1,9 +1,9 @@
-#include <stdarg.h>
-#include <assert.h>
-#include <stdio.h>
 #include "ft_getopt.h"
-#include <string.h>
+#include <assert.h>
 #include <getopt.h>
+#include <stdio.h>
+#include <stdarg.h>
+#include <string.h>
 
 int ft_optind = 0, ft_opterr = 0, ft_optopt = 0;
 char *ft_optarg = NULL;
@@ -126,8 +126,8 @@ static int do_getopt_short(int argc, char **argv, const char *optstring)
 	const char *pos = strchr(optstring, opt);
 
 	if (!pos) {
+		ft_optopt = opt;
 		if (!colon && ft_opterr) {
-			ft_optopt = opt;
 			print_error(argv[0], "invalid option -- '%c'\n",
 				    ft_optopt);
 		}
@@ -206,9 +206,8 @@ int ft_getopt_long(int argc, char **argv, const char *optstring,
 	if (!ft_optind)
 		init_getopt();
 
-	if (ft_optchar > 1) {
+	if (ft_optchar > 1)
 		return ft_getopt(argc, argv, optstring);
-	}
 
 	int saved = ft_optind;
 	int tmp = ft_optind;
