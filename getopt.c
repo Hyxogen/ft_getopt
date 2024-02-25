@@ -181,11 +181,13 @@ static int do_getopt_common(int argc, char **argv, const char *optstring,
 
 	int res;
 	if (ft_optchar == 1 && longopts && argv[ft_optind][1] == '-') {
-		res = do_getopt_long(argc, argv, optstring, longopts, longindex);
+		res = do_getopt_long(argc, argv, optstring, longopts,
+				     longindex);
 	} else {
 		res = do_getopt_short(argc, argv, optstring);
 
-		if (ft_optchar && argv[ft_optind] && !argv[ft_optind][ft_optchar]) {
+		if (ft_optchar && argv[ft_optind] &&
+		    !argv[ft_optind][ft_optchar]) {
 			ft_optchar = 1;
 			++ft_optind;
 		}
