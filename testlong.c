@@ -7,6 +7,7 @@
 #define OPTIND ft_optind
 #define OPTERR ft_opterr
 #define OPTARG ft_optarg
+#define OPTOPT ft_optopt
 #else
 #include <unistd.h>
 #include <getopt.h>
@@ -14,10 +15,12 @@
 #define OPTIND optind
 #define OPTERR opterr
 #define OPTARG optarg
+#define OPTOPT optopt
 #endif
 
 extern int OPTIND;
 extern int OPTERR;
+extern int OPTOPT;
 extern char* OPTARG;
 
 #ifndef OPTERR_VAL
@@ -31,7 +34,10 @@ static void test(int argc, char **argv, const char *optstring, const struct opti
 	OPTERR = OPTERR_VAL;
 	int c, longindex = -1;
 	while ((c = GETOPT_LONG(argc, argv, optstring, longopts, &longindex)) != -1) {
-		printf("ret: %x arg: \"%s\" longindex: %i \n", (unsigned) c, OPTARG, longindex);
+		printf("ret: %x arg: \"%s\" longindex: %i", (unsigned) c, OPTARG, longindex);
+		if (c == ':' || c == '?')
+			printf(" OPTOPT: %x", (unsigned) OPTOPT);
+		printf("\n");
 		for (size_t i = 0; longopts[i].name; ++i) {
 			if (longopts[i].flag)
 				printf("%zu: flag: %i \n", i, *longopts[i].flag);

@@ -59,6 +59,7 @@ static int do_getopt_long(int argc, char **argv, const char *optstring,
 		const struct option *opt = &longopts[match];
 		if (*arg == '=') {
 			if (!opt->has_arg) {
+				ft_optopt = opt->val;
 				if (!colon && ft_opterr)
 					print_error(
 						argv[0],
