@@ -159,16 +159,13 @@ static int do_getopt_short(int argc, char **argv, const char *optstring)
 	return opt;
 }
 
-static void init_getopt()
+static int do_getopt_common(int argc, char **argv, const char *optstring,
+			    const struct option *longopts, int *longindex)
 {
-	ft_optind = 1;
-	ft_optchar = 1;
-}
-
-int ft_getopt(int argc, char **argv, const char *optstring)
-{
-	if (!ft_optind)
-		init_getopt();
+	if (!ft_optind) {
+		ft_optind = 1;
+		ft_optchar = 1;
+	}
 
 	if (ft_optind >= argc || !argv[ft_optind])
 		return -1;
@@ -182,11 +179,16 @@ int ft_getopt(int argc, char **argv, const char *optstring)
 	}
 	int resumed = ft_optind = tmp;
 
-	int res = do_getopt_short(argc, argv, optstring);
+	int res;
+	if (ft_optchar == 1 && longopts && argv[ft_optind][1] == '-') {
+		res = do_getopt_long(argc, argv, optstring, longopts, longindex);
+	} else {
+		res = do_getopt_short(argc, argv, optstring);
 
-	if (ft_optchar && argv[ft_optind] && !argv[ft_optind][ft_optchar]) {
-		ft_optchar = 1;
-		++ft_optind;
+		if (ft_optchar && argv[ft_optind] && !argv[ft_optind][ft_optchar]) {
+			ft_optchar = 1;
+			++ft_optind;
+		}
 	}
 
 	if (resumed > saved) {
@@ -197,36 +199,13 @@ int ft_getopt(int argc, char **argv, const char *optstring)
 	return res;
 }
 
+int ft_getopt(int argc, char **argv, const char *optstring)
+{
+	return do_getopt_common(argc, argv, optstring, NULL, NULL);
+}
+
 int ft_getopt_long(int argc, char **argv, const char *optstring,
 		   const struct option *longopts, int *longindex)
 {
-	assert(argv);
-
-	if (!ft_optind)
-		init_getopt();
-
-	if (ft_optchar > 1)
-		return ft_getopt(argc, argv, optstring);
-
-	int saved = ft_optind;
-	int tmp = ft_optind;
-	while (!argv[tmp] || argv[tmp][0] != '-') {
-		if (!argv[tmp])
-			return -1;
-		++tmp;
-	}
-
-	if (argv[tmp][1] != '-')
-		return ft_getopt(argc, argv, optstring);
-
-	int resumed = ft_optind = tmp;
-
-	int res = do_getopt_long(argc, argv, optstring, longopts, longindex);
-
-	if (resumed > saved) {
-		for (int i = ft_optind - resumed; i > 0; --i)
-			permute(argv, saved, ft_optind - 1);
-		ft_optind -= resumed - saved;
-	}
-	return res;
+	return do_getopt_common(argc, argv, optstring, longopts, longindex);
 }
