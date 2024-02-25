@@ -144,11 +144,10 @@ static int do_getopt_short(int argc, char **argv, const char *optstring)
 			ft_optarg = argv[ft_optind + 1];
 			ft_optind += 2;
 			ft_optchar = 1;
-		} else if (colon) {
-			ft_optopt = opt;
-			return ':';
 		} else {
 			ft_optopt = opt;
+			if (colon)
+				return ':';
 			if (ft_opterr)
 				print_error(
 					argv[0],
