@@ -19,6 +19,7 @@ print_error(const char *progname, const char *restrict fmt, ...)
 	if (progname)
 		fprintf(stderr, "%s: ", progname);
 	vfprintf(stderr, fmt, list);
+	va_end(list);
 }
 
 static int do_getopt_long(int argc, char **argv, const char *optstring,
