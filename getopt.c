@@ -95,7 +95,8 @@ static int do_getopt_long(int argc, char **argv, const char *optstring,
 		if (cnt > 1)
 			print_error(argv[0], "option '%s' is ambigious\n", cur);
 		else
-			print_error(argv[0], "unrecognized option: '%s'\n", cur);
+			print_error(argv[0], "unrecognized option: '%s'\n",
+				    cur);
 	}
 	return '?';
 }
@@ -156,7 +157,7 @@ static int do_getopt_short(int argc, char **argv, const char *optstring)
 		}
 	}
 	return opt;
-} 
+}
 
 static void init_getopt()
 {
@@ -194,7 +195,6 @@ int ft_getopt(int argc, char **argv, const char *optstring)
 		ft_optind -= resumed - saved;
 	}
 
-	//printf("getopt=%i\n", ft_optind);
 	return res;
 }
 
@@ -203,7 +203,6 @@ int ft_getopt_long(int argc, char **argv, const char *optstring,
 {
 	assert(argv);
 
-	//printf("ft_optind=%i\n", ft_optind);
 	if (!ft_optind)
 		init_getopt();
 
@@ -219,12 +218,10 @@ int ft_getopt_long(int argc, char **argv, const char *optstring,
 		++tmp;
 	}
 
-	if (argv[tmp][1] != '-') {
-		//printf("a\n");
+	if (argv[tmp][1] != '-')
 		return ft_getopt(argc, argv, optstring);
-	}
+
 	int resumed = ft_optind = tmp;
-	//printf("b\n");
 
 	int res = do_getopt_long(argc, argv, optstring, longopts, longindex);
 

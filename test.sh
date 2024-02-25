@@ -134,6 +134,7 @@ run_tests_long() {
 
 
 if [ "$#" = 0 ]; then
+	run_tests
 	run_tests_long
 else
 	diff_test $@
