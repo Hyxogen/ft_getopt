@@ -194,6 +194,7 @@ int ft_getopt(int argc, char **argv, const char *optstring)
 		ft_optind -= resumed - saved;
 	}
 
+	//printf("getopt=%i\n", ft_optind);
 	return res;
 }
 
@@ -202,10 +203,11 @@ int ft_getopt_long(int argc, char **argv, const char *optstring,
 {
 	assert(argv);
 
+	//printf("ft_optind=%i\n", ft_optind);
 	if (!ft_optind)
 		init_getopt();
 
-	if (ft_optchar) {
+	if (ft_optchar > 1) {
 		return ft_getopt(argc, argv, optstring);
 	}
 
@@ -216,11 +218,13 @@ int ft_getopt_long(int argc, char **argv, const char *optstring,
 			return -1;
 		++tmp;
 	}
-	int resumed = ft_optind = tmp;
 
-	if (argv[ft_optind][1] != '-') {
+	if (argv[tmp][1] != '-') {
+		//printf("a\n");
 		return ft_getopt(argc, argv, optstring);
 	}
+	int resumed = ft_optind = tmp;
+	//printf("b\n");
 
 	int res = do_getopt_long(argc, argv, optstring, longopts, longindex);
 

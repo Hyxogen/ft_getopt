@@ -97,10 +97,9 @@ run_tests() {
 
 run_tests_long() {
 	DRIVER=testlong.c
-	#run_tests
+	run_tests
 	
 	diff_test_both ':abcdef:o:' a b -fyes
-	return;
 	diff_test_both ':abcdef:o:' a b -cdfyes --vl -abc -similarv -a 4 --reqarg=x --setflag f
 	diff_test_both ':abcdef:o:' -a --setflag
 	diff_test_both ':abcdef:o:' a -similarv
@@ -135,7 +134,7 @@ run_tests_long() {
 
 
 if [ "$#" = 0 ]; then
-	run_tests
+	run_tests_long
 else
 	diff_test $@
 	#run $@

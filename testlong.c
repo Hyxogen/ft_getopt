@@ -37,6 +37,7 @@ static void test(int argc, char **argv, const char *optstring, const struct opti
 				printf("%zu: flag: %i \n", i, *longopts[i].flag);
 		}
 		OPTARG = NULL;
+		longindex = -1;
 	}
 	printf("optind at end: %i\n", OPTIND);
 	printf("remaining arguments:\n");
