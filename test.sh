@@ -99,6 +99,8 @@ run_tests_long() {
 	DRIVER=testlong.c
 	run_tests
 	
+	diff_test_both '' a b d --reqarg kaas boter en ei
+
 	diff_test_both ':abcdef:o:' a b -fyes
 	diff_test_both ':abcdef:o:' a b -cdfyes --vl -abc -similarv -a 4 --reqarg=x --setflag f
 	diff_test_both ':abcdef:o:' -a --setflag

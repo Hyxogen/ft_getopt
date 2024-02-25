@@ -194,7 +194,6 @@ int ft_getopt(int argc, char **argv, const char *optstring)
 			permute(argv, saved, ft_optind - 1);
 		ft_optind -= resumed - saved;
 	}
-
 	return res;
 }
 
@@ -226,7 +225,7 @@ int ft_getopt_long(int argc, char **argv, const char *optstring,
 
 	if (resumed > saved) {
 		for (int i = ft_optind - resumed; i > 0; --i)
-			permute(argv, saved, resumed);
+			permute(argv, saved, ft_optind - 1);
 		ft_optind -= resumed - saved;
 	}
 	return res;
