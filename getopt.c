@@ -137,11 +137,11 @@ static int do_getopt_short(int argc, char **argv, const char *optstring)
 		if (cur[ft_optchar]) {
 			ft_optarg = &cur[ft_optchar];
 			++ft_optind;
-			ft_optchar = 0;
+			ft_optchar = 1;
 		} else if (ft_optind + 1 < argc) {
 			ft_optarg = argv[ft_optind + 1];
 			ft_optind += 2;
-			ft_optchar = 0;
+			ft_optchar = 1;
 		} else if (colon) {
 			ft_optopt = opt;
 			return ':';
@@ -161,7 +161,7 @@ static int do_getopt_short(int argc, char **argv, const char *optstring)
 static void init_getopt()
 {
 	ft_optind = 1;
-	ft_optchar = 0;
+	ft_optchar = 1;
 }
 
 int ft_getopt(int argc, char **argv, const char *optstring)
@@ -172,39 +172,28 @@ int ft_getopt(int argc, char **argv, const char *optstring)
 	if (ft_optind >= argc || !argv[ft_optind])
 		return -1;
 
-	if (ft_optchar && !argv[ft_optind][ft_optchar]) {
-		ft_optchar = 1;
-		++ft_optind;
-	}
-
-	if (ft_optchar == 0)
-		++ft_optchar;
-
 	int saved = ft_optind;
-
 	int tmp = ft_optind;
 	while (!argv[tmp] || argv[tmp][0] != '-') {
 		if (!argv[tmp])
 			return -1;
 		++tmp;
-		ft_optchar = 1;
 	}
 	int resumed = ft_optind = tmp;
 
 	int res = do_getopt_short(argc, argv, optstring);
 
+	if (ft_optchar && argv[ft_optind] && !argv[ft_optind][ft_optchar]) {
+		ft_optchar = 1;
+		++ft_optind;
+	}
+
 	if (resumed > saved) {
-		for (int i = ft_optind - saved; i > 0; --i)//TODO check, it's
-							   //currently not the
-							   //same as getopt_long
-			permute(argv, saved, ft_optind);
+		for (int i = ft_optind - resumed; i > 0; --i)
+			permute(argv, saved, ft_optind - 1);
 		ft_optind -= resumed - saved;
 	}
 
-	if (argv[ft_optind] && !argv[ft_optind][ft_optchar]) {
-		++ft_optind;
-		ft_optchar = 0;
-	}
 	return res;
 }
 
@@ -227,10 +216,11 @@ int ft_getopt_long(int argc, char **argv, const char *optstring,
 			return -1;
 		++tmp;
 	}
-	if (argv[tmp][1] != '-')
-		return ft_getopt(argc, argv, optstring);
-
 	int resumed = ft_optind = tmp;
+
+	if (argv[ft_optind][1] != '-') {
+		return ft_getopt(argc, argv, optstring);
+	}
 
 	int res = do_getopt_long(argc, argv, optstring, longopts, longindex);
 

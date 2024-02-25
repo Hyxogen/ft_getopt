@@ -4,6 +4,10 @@ CC=cc
 CFLAGS="-fsanitize=address,undefined -Wall -Wextra -fsanitize-trap=all"
 DRIVER=test.c
 
+escape() {
+	echo "$@" | sed 's/"/\\"/g'
+}
+
 compile_cmd() {
 	OPTERR=$1
 	shift
@@ -21,7 +25,7 @@ diff_test() {
 	THEIRS_STDOUT=$(mktemp)
 	THEIRS_STDERR=$(mktemp)
 
-	CMD=$(compile_cmd "$@")
+	export CMD=$(compile_cmd "$@")
 	shift 2
 
 	$CMD -DMINE=1
@@ -32,7 +36,7 @@ diff_test() {
 	THEIR_RES=$?
 
 	if [ $MY_RES != 0 ]; then
-		echo "KO (exit val): $CMD -DMINE=1"
+		echo "KO (exit val): $(escape $CMD) -DMINE=1"
 		echo "run: ./a.out $@"
 		return
 	fi
@@ -42,7 +46,7 @@ diff_test() {
 		echo "KO"
 		echo "< mine"
 		echo "> theirs"
-		echo "compiled with: $CMD"
+		echo "compiled with: $(escape $CMD)"
 		echo "run: ./a.out $@"
 
 		diff $MINE_STDOUT $THEIRS_STDOUT --color
@@ -53,7 +57,7 @@ diff_test() {
 		echo "KO"
 		echo "< mine"
 		echo "> theirs"
-		echo "compiled with: $CMD"
+		echo "compiled with: $(escape $CMD)"
 		echo "run: ./a.out $@"
 
 		diff $MINE_STDERR $THEIRS_STDERR --color
@@ -67,6 +71,11 @@ diff_test_both() {
 }
 
 run_tests() {
+	
+	diff_test_both ':zo:' kaas -zo
+	diff_test_both ':zo:' kaas -zo boter
+	diff_test_both ':zo:' -zokaas
+	diff_test_both ':abcdef:o:' a b -fyes
 	diff_test_both '' -a -b -c -d
 	diff_test_both ':f' -f
 	diff_test_both 'abcd' -a -b -c -d
@@ -89,6 +98,12 @@ run_tests() {
 run_tests_long() {
 	DRIVER=testlong.c
 	#run_tests
+	
+	diff_test_both ':abcdef:o:' a b -fyes
+	return;
+	diff_test_both ':abcdef:o:' a b -cdfyes --vl -abc -similarv -a 4 --reqarg=x --setflag f
+	diff_test_both ':abcdef:o:' -a --setflag
+	diff_test_both ':abcdef:o:' a -similarv
 
 	diff_test_both '' --vlag
 	diff_test_both '' --vlag=no
@@ -102,11 +117,25 @@ run_tests_long() {
 	diff_test_both '' --reqarg a
 	diff_test_both '' --reqarg=a
 	diff_test_both '' --setflag
+	diff_test_both '' --setflag=a
+
+	diff_test_both '' a --vlag
+	diff_test_both '' --vlag a
+
+	diff_test_both '' a --vlag b c d --similarv
+	diff_test_both '' a --vlag b --similarv d
+	diff_test_both '' a --vlag --similarv d
+	diff_test_both '' a --vla=no --similarv d
+
+	diff_test_both '' --0ptarg --vlag
+
+	diff_test_both 'abcdef:o:' a b -cdfyes --vl -abc -similarv -a 4 --reqarg=x --setflag f
+	diff_test_both 'abcdef:o:' a b -cdfyes --vl -abc -similarv --similarv -a 4 --reqarg=x --setflag f
 }
 
 
 if [ "$#" = 0 ]; then
-	run_tests_long
+	run_tests
 else
 	diff_test $@
 	#run $@

@@ -33,7 +33,6 @@ int main(int argc, char **argv)
 		printf("ret: %x arg: \"%s\"\n", (unsigned) c, OPTARG);
 		OPTARG = NULL;
 	}
-	printf("optind at end: %i\n", OPTIND);
 	printf("remaining arguments:\n");
 	for (; OPTIND < argc; ++OPTIND)
 		printf("%i: \"%s\"\n", OPTIND, argv[OPTIND]);
